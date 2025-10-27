@@ -1,14 +1,16 @@
 package com.parsley.parsley_chat;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
-@RequiredArgsConstructor
+import lombok.Getter;
+
+@Service
 @Getter
 public class MessageService {
 
-  private List<Message> messages;
+  private List<Message> messages = new ArrayList<>();
 
 }

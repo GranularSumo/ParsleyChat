@@ -25,8 +25,8 @@ public class MessageController {
    * @return the message that gets broadcast to the subscribers of the room.
    */
 
-  @MessageMapping("/message/{roomid}")
-  @SendTo("/room/{roomId}")
+  @MessageMapping("/message/{roomId}")
+  @SendTo("/chatroom/{roomId}")
   public Message sendMessage(@DestinationVariable String roomId, @Payload Message message) {
     messageService.getMessages().add(message);
     return message;
@@ -36,13 +36,13 @@ public class MessageController {
    * I don't know if this is the best way to do this, but im using this to
    * retrieve the
    * message history for the room when a client connects.
-   * 
+   *
    * @param roomId the id of the room that the user(client) is currently in.
    */
 
   @MessageMapping("/join/{roomId}")
   public void getMessageHistory(@DestinationVariable String roomId) {
-    template.convertAndSend("/room" + roomId + "/history", messageService.getMessages());
+    template.convertAndSend("/chatroom/" + roomId + "/history", messageService.getMessages());
   }
 
 }
