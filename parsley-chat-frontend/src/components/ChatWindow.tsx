@@ -4,6 +4,17 @@ import SockJS from "sockjs-client";
 import logo from "../assets/ChatGPT Image Oct 27, 2025, 09_09_33 AM.png";
 import LoginScreen from "./LoginScreen";
 
+
+/*
+ * TODO: extract the websocket logic into a separate hook.
+ * TODO: extract the message state logic into a separate hook.
+ * TODO: break this component up into ChatHeader, MessageWindow, MessageBubble, ChatInput, ChatRoomList.
+ * TODO: implement the ChatRoomList logic.
+ * TODO: rename this component to be: ChatRoom?
+ * TODO: remove the logic for the LoginScreen because that should be handled with the router.
+ * TODO: the stompClient should be handled with state management.
+ */
+
 interface ChatMessage {
   senderName: string;
   message: string;
@@ -17,6 +28,8 @@ interface UserData {
   roomId: number;
 }
 
+
+
 let stompClient: Client | null = null;
 
 export default function ChatWindow() {
@@ -28,7 +41,6 @@ export default function ChatWindow() {
     connected: false,
     roomId: 1,
   });
-  const [connecting, setConnecting] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
   function scrollToBottom() {
@@ -41,7 +53,6 @@ export default function ChatWindow() {
 
   // this sets up the websocket connection.
   function connect() {
-    setConnecting(true);
     setError("");
 
     try {
@@ -56,16 +67,9 @@ export default function ChatWindow() {
 
       stompClient.activate();
 
-      setTimeout(() => {
-        if (!userData.connected && connecting) {
-          setError("Failed to connect. Make sure the backend is running on port 8080.");
-          setConnecting(false);
-        }
-      }, 5000);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
       setError("Connection failed: " + errorMessage);
-      setConnecting(false);
     }
   }
 
@@ -76,7 +80,6 @@ export default function ChatWindow() {
   // but im pretty sure the backend is set up to handle multiple chatrooms.
   function onConnected() {
     setUserData(prev => ({ ...prev, connected: true }));
-    setConnecting(false);
     setError("");
 
     if (stompClient) {
@@ -95,7 +98,6 @@ export default function ChatWindow() {
   function onError(error: any) {
     console.error("Connection error:", error);
     setUserData(prev => ({ ...prev, connected: false }));
-    setConnecting(false);
     setError("Connection failed. Is the backend running?");
   }
 
@@ -125,7 +127,7 @@ export default function ChatWindow() {
           <div className={`text-sm mb-1 ${isOwn ? 'text-green-400' : 'text-cyan-400'}`}>
             {isOwn ? 'You@terminal' : `${message.senderName}@terminal`}
           </div>
-          <div className={`px-4 py-2 rounded border-2 ${isOwn
+          <div className={`px-4 py-2 rounded border whitespace-pre-wrap ${isOwn
             ? 'bg-green-900 border-green-500 text-green-200'
             : 'bg-cyan-900 border-cyan-500 text-cyan-200'
             }`}>
@@ -194,14 +196,13 @@ export default function ChatWindow() {
       {!userData.connected ? (
         <LoginScreen
           username={userData.senderName}
-          connecting={connecting}
           error={error}
           onUsernameChange={handleUsernameInput}
           onConnect={handleConnect}
         />
       ) : (
-        <div className="w-full h-full bg-black border-4 border-green-500 rounded-lg shadow-2xl flex flex-col overflow-hidden">
-          <div className="bg-green-900 border-b-2 border-green-500 px-4 py-2 flex items-center justify-between">
+        <div className="w-full h-full bg-black border border-green-500 rounded-lg shadow-2xl flex flex-col overflow-hidden">
+          <div className="bg-green-900 border-b border-green-500 px-4 py-2 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img src={logo} alt="Logo" className="w-8 h-8 object-cover rounded-full rotate-45" />
               <div className="text-green-300 text-xl tracking-wider">
@@ -216,19 +217,20 @@ export default function ChatWindow() {
             </div>
           </div>
 
+          <div className="text-green-500 mb-4 text-sm border-b border-green-800 p-4 bg-black">
+            === CHATROOM #{userData.roomId} === USER: {userData.senderName} ===
+          </div>
+
           <div className="flex-1 overflow-y-auto bg-black p-4">
-            <div className="text-green-500 mb-4 text-sm border-b border-green-800 pb-2">
-              === CHATROOM #{userData.roomId} === USER: {userData.senderName} ===
-            </div>
             <ul className="space-y-2">
               {chatMessages}
               <div ref={messagesEndRef} />
             </ul>
           </div>
 
-          <div className="bg-green-950 border-t-2 border-green-500 p-4">
+          <div className="bg-green-950 border-t border-green-500 p-4">
             <div className="flex items-start gap-2">
-              <span className="text-green-400 text-xl mt-1 flex-shrink-0">&gt;_</span>
+              <span className="text-green-400 text-xl shrink-0">&gt;_</span>
               <textarea
                 className="flex-1 bg-transparent text-green-300 text-lg outline-none resize-none placeholder-green-700 min-h-[60px]"
                 placeholder="Enter message..."
@@ -240,7 +242,7 @@ export default function ChatWindow() {
               <button
                 type="button"
                 onClick={handleSend}
-                className="bg-green-700 hover:bg-green-600 text-black font-bold px-6 py-2 border-2 border-green-400 transition-colors text-lg tracking-wider"
+                className="bg-green-700 hover:bg-green-600 text-black font-bold px-6 py-2 border border-green-400 transition-colors text-lg tracking-wider"
               >
                 SEND
               </button>
