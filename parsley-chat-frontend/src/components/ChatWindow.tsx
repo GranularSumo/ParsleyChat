@@ -1,39 +1,25 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Client, type IMessage } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import logo from "../assets/ChatGPT Image Oct 27, 2025, 09_09_33 AM.png";
 import LoginScreen from "./LoginScreen";
+import ChatHeader from "./ChatHeader";
+import ChatInputArea from "./ChatInputArea";
+import MessageWindow from "./MessageWindow";
+import type { ChatMessage, UserData } from "../types/Chat.types";
 
 
 /*
  * TODO: extract the websocket logic into a separate hook.
  * TODO: extract the message state logic into a separate hook.
- * TODO: break this component up into ChatHeader, MessageWindow, MessageBubble, ChatInput, ChatRoomList.
  * TODO: implement the ChatRoomList logic.
  * TODO: rename this component to be: ChatRoom?
  * TODO: remove the logic for the LoginScreen because that should be handled with the router.
  * TODO: the stompClient should be handled with state management.
  */
 
-interface ChatMessage {
-  senderName: string;
-  message: string;
-  roomId: number;
-}
-
-interface UserData {
-  senderName: string;
-  message: string;
-  connected: boolean;
-  roomId: number;
-}
-
-
-
 let stompClient: Client | null = null;
 
 export default function ChatWindow() {
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [userData, setUserData] = useState<UserData>({
     senderName: "",
@@ -43,13 +29,6 @@ export default function ChatWindow() {
   });
   const [error, setError] = useState<string>("");
 
-  function scrollToBottom() {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
 
   // this sets up the websocket connection.
   function connect() {
@@ -117,26 +96,7 @@ export default function ChatWindow() {
     setMessages(history);
   }
 
-  // this maps the messages in the array to display them in the chat window. I think we can come up with a much better way of doing this,
-  // but this was how it was done in the article that I read to initially set this up.
-  const chatMessages = messages.map((message, index) => {
-    const isOwn = message.senderName === userData.senderName;
-    return (
-      <li key={index} className={`mb-4 flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-        <div className={`max-w-[70%] ${isOwn ? 'items-end' : 'items-start'} flex flex-col`}>
-          <div className={`text-sm mb-1 ${isOwn ? 'text-green-400' : 'text-cyan-400'}`}>
-            {isOwn ? 'You@terminal' : `${message.senderName}@terminal`}
-          </div>
-          <div className={`px-4 py-2 rounded border whitespace-pre-wrap ${isOwn
-            ? 'bg-green-900 border-green-500 text-green-200'
-            : 'bg-cyan-900 border-cyan-500 text-cyan-200'
-            }`}>
-            {message.message}
-          </div>
-        </div>
-      </li>
-    );
-  });
+
 
   function handleMessageInput(event: React.ChangeEvent<HTMLTextAreaElement>) {
     const { value } = event.target;
@@ -152,6 +112,7 @@ export default function ChatWindow() {
   // but I guess we will see.
   function handleSend() {
     if (userData.message.trim() && stompClient) {
+      const currentDate = new Date();
       const chatMessage: ChatMessage = {
         senderName: userData.senderName,
         message: userData.message,
@@ -202,55 +163,22 @@ export default function ChatWindow() {
         />
       ) : (
         <div className="w-full h-full bg-black border border-green-500 rounded-lg shadow-2xl flex flex-col overflow-hidden">
-          <div className="bg-green-900 border-b border-green-500 px-4 py-2 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img src={logo} alt="Logo" className="w-8 h-8 object-cover rounded-full rotate-45" />
-              <div className="text-green-300 text-xl tracking-wider">
-                PARSLEY-CHAT TERMINAL v9000.01
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <div className={`w-3 h-3 rounded-full ${userData.connected ? 'bg-green-400' : 'bg-red-400'} animate-pulse`}></div>
-              <span className="text-green-300 text-sm">
-                {userData.connected ? 'CONNECTED' : 'DISCONNECTING...'}
-              </span>
-            </div>
-          </div>
 
-          <div className="text-green-500 mb-4 text-sm border-b border-green-800 p-4 bg-black">
-            === CHATROOM #{userData.roomId} === USER: {userData.senderName} ===
-          </div>
+          <ChatHeader
+            connected={userData.connected}
+            roomId={userData.roomId}
+            username={userData.senderName}
+          />
 
-          <div className="flex-1 overflow-y-auto bg-black p-4">
-            <ul className="space-y-2">
-              {chatMessages}
-              <div ref={messagesEndRef} />
-            </ul>
-          </div>
+          <MessageWindow messages={messages} userData={userData} />
 
-          <div className="bg-green-950 border-t border-green-500 p-4">
-            <div className="flex items-start gap-2">
-              <span className="text-green-400 text-xl shrink-0">&gt;_</span>
-              <textarea
-                className="flex-1 bg-transparent text-green-300 text-lg outline-none resize-none placeholder-green-700 min-h-[60px]"
-                placeholder="Enter message..."
-                value={userData.message}
-                onChange={handleMessageInput}
-                onKeyDown={handleKeyDown}
-                rows={2}
-              />
-              <button
-                type="button"
-                onClick={handleSend}
-                className="bg-green-700 hover:bg-green-600 text-black font-bold px-6 py-2 border border-green-400 transition-colors text-lg tracking-wider"
-              >
-                SEND
-              </button>
-            </div>
-            <div className="text-green-700 text-xs mt-2">
-              Press ENTER to send | SHIFT+ENTER for new line
-            </div>
-          </div>
+          <ChatInputArea
+            message={userData.message}
+            handleMessageInput={handleMessageInput}
+            handleKeyDown={handleKeyDown}
+            handleSend={handleSend}
+          />
+
         </div>
       )}
     </div>
