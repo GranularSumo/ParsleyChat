@@ -1,23 +1,37 @@
+import { useEffect } from "react";
 import logo from "../assets/ChatGPT Image Oct 27, 2025, 09_09_33 AM.png";
+import { useConnectionContext } from "../contexts/ConnectionContext";
+import { useNavigate } from 'react-router';
 
-interface LoginScreenProps {
-  username: string;
-  error: string;
-  onUsernameChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onConnect: () => void;
-}
 
-export default function LoginScreen({
-  username,
-  error,
-  onUsernameChange,
-  onConnect,
-}: LoginScreenProps) {
+export default function LoginScreen() {
+
+  const connectionContext = useConnectionContext();
+  const navigate = useNavigate();
+
+
+  useEffect(() => {
+    if (connectionContext.connected) {
+      navigate("/chat");
+    }
+  }, [connectionContext.connected, navigate])
+
+  function handleConnect() {
+    if (connectionContext.username.trim()) {
+      connectionContext.connect();
+    }
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      onConnect();
+      handleConnect();
     }
   };
+
+  function handleUsernameInput(event: React.ChangeEvent<HTMLInputElement>) {
+    const { value } = event.target;
+    connectionContext.setUsername(value);
+  }
 
   return (
     <div className="w-full h-full flex items-center justify-center bg-black">
@@ -37,19 +51,19 @@ export default function LoginScreen({
             type="text"
             className="w-full bg-black border rounded-lg border-green-500 text-green-300 px-4 py-3 text-lg outline-none focus:border-green-400 transition-colors"
             placeholder="username@terminal"
-            value={username}
-            onChange={onUsernameChange}
+            value={connectionContext.username}
+            onChange={handleUsernameInput}
             onKeyDown={handleKeyDown}
           />
         </div>
-        {error && (
+        {connectionContext.error && (
           <div className="mb-4 text-red-400 text-sm border border-red-500 bg-red-900 bg-opacity-20 p-3 rounded">
-            ERROR: {error}
+            ERROR: {connectionContext.error}
           </div>
         )}
         <button
-          onClick={onConnect}
-          disabled={!username.trim()}
+          onClick={handleConnect}
+          disabled={!connectionContext.username.trim()}
           className="w-full bg-green-700 hover:bg-green-600 text-black font-bold py-3 px-6 border rounded-lg border-green-400 transition-colors text-xl tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {"> CONNECT"}

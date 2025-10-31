@@ -1,19 +1,31 @@
-import type { ChangeEvent } from "react";
+import { useState } from "react";
 
 interface ChatInputAreaProps {
-  message: string;
-  handleMessageInput(event: ChangeEvent<HTMLTextAreaElement>): void;
-  handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>): void;
-  handleSend(): void;
+  sendMessage(messageText: string): void;
 }
 
-
 export default function ChatInputArea({
-  message,
-  handleMessageInput,
-  handleKeyDown,
-  handleSend
+  sendMessage,
 }: ChatInputAreaProps) {
+  const [message, setMessage] = useState("");
+
+  function handleMessageInput(event: React.ChangeEvent<HTMLTextAreaElement>) {
+    const { value } = event.target;
+    setMessage(value);
+  }
+
+  function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      sendMessage(message);
+      setMessage("");
+    }
+  }
+
+  function handleSend() {
+    sendMessage(message);
+    setMessage("");
+  }
 
   return (
     <>

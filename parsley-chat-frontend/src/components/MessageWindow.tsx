@@ -1,16 +1,23 @@
 import { useEffect, useRef } from "react";
-import type { UserData, ChatMessage } from "../types/Chat.types";
+import type { ChatMessage } from "../types/Chat.types";
+import MessageBubble from "./MessageBubble";
+
+//TODO: need to set up a way to paginate the message history because its currently just grabbing everything in one go.
+//TODO: should also think about how the different chat rooms are handling messages, because currently we are only
+//      grabbing messages for one chat room at a time, which wont allow for message previews and notifications etc.
+//      but that might need to be handled via a different process.
 
 interface MessageWindowProps {
   messages: ChatMessage[];
-  userData: UserData;
+  username: string;
 }
 
 export default function MessageWindow({
   messages,
-  userData,
+  username,
 }: MessageWindowProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messageAnimationDelays = useRef(new Map<number, string>()).current;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
@@ -19,24 +26,20 @@ export default function MessageWindow({
   }, [messages]);
 
   const chatMessages = messages.map((message, index) => {
-    const isOwn = message.senderName === userData.senderName;
+    const isOwn = message.senderName === username;
+
+    if (!messageAnimationDelays.has(index)) {
+      messageAnimationDelays.set(index, `${-(Date.now() % 2000)}ms`);
+    }
+    const animationDelay = messageAnimationDelays.get(index)!;
+
     return (
-      <li key={index} className={`mb-4 flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-        <div className={`max-w-[70%] ${isOwn ? 'items-end' : 'items-start'} flex flex-col`}>
-          <div className={`text-sm mb-1 ${isOwn ? 'text-green-400' : 'text-cyan-400'}`}>
-            {isOwn ? 'You@terminal' : `${message.senderName}@terminal`}
-          </div>
-          <div className="relative">
-            <div className={`absolute message-pulse inset-1 rounded-sm ${isOwn ? 'bg-green-500' : 'bg-cyan-500'}`}></div>
-            <div className={`relative border bg-black px-4 py-2 rounded whitespace-pre-wrap ${isOwn
-              ? 'border-green-500 bg-black hover:bg-green-950 text-green-200'
-              : 'border-cyan-500 bg-black hover:bg-cyan-900 text-cyan-200'
-              }`}>
-              {message.message}
-            </div>
-          </div>
-        </div>
-      </li>
+      <MessageBubble
+        key={index}
+        isOwn={isOwn}
+        animationDelay={animationDelay}
+        message={message}
+      />
     );
   });
 

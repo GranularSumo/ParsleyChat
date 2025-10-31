@@ -2,7 +2,6 @@ export interface UserData {
   senderName: string;
   connected: boolean;
   roomId: number;
-  message: string;
 }
 
 

@@ -2,13 +2,13 @@ import logo from '../assets/ChatGPT Image Oct 27, 2025, 09_09_33 AM.png';
 
 interface ChatHeaderProps {
   connected: boolean;
-  roomId: number;
+  roomName: string;
   username: string;
 }
 
 export default function ChatHeader({
   connected,
-  roomId,
+  roomName,
   username
 }: ChatHeaderProps) {
 
@@ -33,9 +33,9 @@ export default function ChatHeader({
         </div>
       </div>
 
-      <div className="px-4 py-2 bg-black border-b border-green-800 text-green-500 text-sm mb-4">
+      <div className="px-4 py-2 bg-black border-b border-green-800 text-green-500 text-sm">
         <div className="relative overflow-hidden whitespace-nowrap items-center">
-          <span className='relative z-10 bg-black pr-4'>| CHATROOM: {roomId} | USER: {username} |</span>
+          <span className='relative z-10 bg-black pr-4'>| CURRENT CHATROOM: {roomName} | USER: {username} |</span>
           <span className='text-xs opacity-50 absolute left-0 top-1 animate-ticker'>{scrollingText}</span>
         </div>
       </div>

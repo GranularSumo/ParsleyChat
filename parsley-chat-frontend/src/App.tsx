@@ -1,18 +1,17 @@
-import ChatWindow from './components/ChatWindow'
+import { Routes, Route, Navigate } from 'react-router';
+import LoginScreen from './components/LoginScreen';
+import ChatWindowLayout from './layouts/ChatWindowLayout';
 
-/*
- * TODO: add react router to the project
- * TODO: set up routes for /login and /Chat
- * TODO: redirect to /login if the user isn't currently connected
- * TODO: replace the ChatWindow with the refactored ChatRoom
-*/
+//TODO: go through all the frontend code and add new comments so that navigating the project is easier.
 
 function App() {
 
   return (
-    <>
-      <ChatWindow />
-    </>
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<LoginScreen />} />
+      <Route path="/chat" element={<ChatWindowLayout />} />
+    </Routes>
   )
 }
 
