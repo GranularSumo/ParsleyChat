@@ -3,6 +3,9 @@ import SockJS from "sockjs-client";
 import { useState, useRef } from "react";
 import type { ChatMessage } from "../types/Chat.types";
 
+//TODO: look into alternative solutions for this setup, as im not sure if this is a particularly well thought out approach...
+//      I feel like the stuff that i'm doing here with the useRefs might not be the best approach? but it works for the moment at least.
+
 export default function useChatConnection(roomId: number, username: string) {
   const stompClientRef = useRef<Client | null>(null);
   const [error, setError] = useState<string>("");
