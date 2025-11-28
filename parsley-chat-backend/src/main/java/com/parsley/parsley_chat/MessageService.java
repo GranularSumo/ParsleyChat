@@ -1,19 +1,26 @@
 package com.parsley.parsley_chat;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Service
-@Getter
+@RequiredArgsConstructor
 public class MessageService {
 
-  private List<Message> messages = new ArrayList<>();
-  private Map<String, List<Message>> messageMap = new HashMap<>();
+  private final MessageRepository messageRepository;
+
+  public Message saveMessage(Message message) {
+    message.setTimestamp(LocalDateTime.now());
+    message.setId(null);
+    return messageRepository.save(message);
+  }
+
+  public List<MessageDTO> getMessageHistoryByRoomId(Long roomId) {
+    return messageRepository.findByRoomIdOrderByTimestampAsc(roomId).stream().map(MessageDTO::fromEntity).toList();
+  }
 
 }

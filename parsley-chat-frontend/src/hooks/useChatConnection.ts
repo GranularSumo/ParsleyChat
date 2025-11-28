@@ -3,16 +3,12 @@ import SockJS from "sockjs-client";
 import { useState, useRef } from "react";
 import type { ChatMessage } from "../types/Chat.types";
 
-//TODO: look into alternative solutions for this setup, as im not sure if this is a particularly well thought out approach...
-//      I feel like the stuff that i'm doing here with the useRefs might not be the best approach? but it works for the moment at least.
-
 export default function useChatConnection(roomId: number, username: string) {
   const stompClientRef = useRef<Client | null>(null);
   const [error, setError] = useState<string>("");
   const [connected, setConnected] = useState<boolean>(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const messageSubscriptionRef = useRef<StompSubscription | null>(null);
-  const historySubscriptionRef = useRef<StompSubscription | null>(null);
   const roomIdRef = useRef<number>(roomId);
 
   function connect() {
@@ -20,7 +16,7 @@ export default function useChatConnection(roomId: number, username: string) {
 
     try {
       const client = new Client({
-        webSocketFactory: () => new SockJS("http://localhost:8080/ws") as WebSocket,
+        webSocketFactory: () => new SockJS("/ws") as WebSocket,
         onConnect: () => onConnected(),
         onStompError: (frame) => onError(frame),
         debug: () => { },
@@ -40,10 +36,24 @@ export default function useChatConnection(roomId: number, username: string) {
     subscribe();
   }
 
+  async function getMessageHistory() {
+    const url = "/chatroom/" + roomIdRef.current + "/history";
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      }
+      const history: ChatMessage[] = await response.json();
+      setMessages(history);
+    } catch (e) {
+      console.error((e as Error).message);
+    }
+  }
+
   function subscribe() {
     if (stompClientRef.current) {
+      getMessageHistory();
       messageSubscriptionRef.current = stompClientRef.current.subscribe("/chatroom/" + roomIdRef.current, onMessageReceived);
-      historySubscriptionRef.current = stompClientRef.current.subscribe("/chatroom/" + roomIdRef.current + "/history", onHistoryReceived);
       stompClientRef.current.publish({
         destination: "/app/join/" + roomIdRef.current,
         body: JSON.stringify({}),
@@ -53,7 +63,6 @@ export default function useChatConnection(roomId: number, username: string) {
 
   function unsubscribe() {
     messageSubscriptionRef.current?.unsubscribe();
-    historySubscriptionRef.current?.unsubscribe();
     setMessages([]);
   }
 
@@ -74,16 +83,12 @@ export default function useChatConnection(roomId: number, username: string) {
     setMessages(msgs => [...msgs, payloadData]);
   }
 
-  function onHistoryReceived(message: IMessage) {
-    const history: ChatMessage[] = JSON.parse(message.body);
-    setMessages(history);
-  }
 
   function sendMessage(messageText: string) {
     if (messageText.trim() && stompClientRef.current) {
       const chatMessage: ChatMessage = {
         senderName: username,
-        message: messageText,
+        content: messageText,
         roomId: roomIdRef.current,
       };
       stompClientRef.current.publish({

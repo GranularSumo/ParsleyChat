@@ -6,7 +6,9 @@ export interface UserData {
 
 
 export interface ChatMessage {
+  id?: number;
   senderName: string;
-  message: string;
+  content: string;
   roomId: number;
+  timestamp?: string;
 }
