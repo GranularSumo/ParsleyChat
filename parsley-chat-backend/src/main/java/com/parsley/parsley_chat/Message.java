@@ -2,21 +2,35 @@ package com.parsley.parsley_chat;
 
 import java.time.LocalDateTime;
 
-import lombok.Getter;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+@Table(name = "messages", indexes = {
+    @Index(name = "idx_room_id", columnList = "roomId")
+})
 public class Message {
 
-  private String senderName;
-  private String message;
-  private String date;
-  private long roomId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-  public Message(String sender, String message, long roomId) {
-    this.senderName = sender;
-    this.message = message;
-    this.roomId = roomId;
-    this.date = LocalDateTime.now().toString();
-  }
+  private Long roomId;
+
+  private String senderName;
+
+  private String content;
+
+  private LocalDateTime timestamp;
 
 }

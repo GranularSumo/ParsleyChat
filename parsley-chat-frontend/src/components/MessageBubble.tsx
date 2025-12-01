@@ -25,7 +25,7 @@ export default function MessageBubble({
             ? 'border-green-500 bg-black hover:bg-green-950 text-green-200'
             : 'border-cyan-500 bg-black hover:bg-cyan-900 text-cyan-200'
             }`}>
-            {message.message}
+            {message.content}
           </div>
         </div>
       </div>
