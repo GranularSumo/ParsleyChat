@@ -1,4 +1,4 @@
-import type { ChatMessage } from "../types/Chat.types";
+import type { ChatMessage } from "../../types/Chat.types";
 
 interface MessageBubbleProps {
   isOwn: boolean;

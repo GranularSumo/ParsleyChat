@@ -1,6 +1,4 @@
-import { useConnectionContext } from "../contexts/ConnectionContext";
-
-//TODO: update the room li styling.
+import { useConnectionContext } from "../../contexts/ConnectionContext";
 
 
 interface chatRoomProps {

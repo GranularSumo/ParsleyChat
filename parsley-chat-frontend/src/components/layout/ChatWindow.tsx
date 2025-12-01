@@ -1,7 +1,7 @@
 import ChatHeader from "./ChatHeader";
-import ChatInputArea from "./ChatInputArea";
-import MessageWindow from "./MessageWindow";
-import { useConnectionContext } from "../contexts/ConnectionContext";
+import ChatInputArea from "../input/ChatInputArea";
+import MessageWindow from "../messages/MessageWindow";
+import { useConnectionContext } from "../../contexts/ConnectionContext";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 

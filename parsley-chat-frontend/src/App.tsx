@@ -1,8 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router';
-import LoginScreen from './components/LoginScreen';
+import LoginScreen from './components/auth/LoginScreen';
 import ChatWindowLayout from './layouts/ChatWindowLayout';
-
-//TODO: go through all the frontend code and add new comments so that navigating the project is easier.
 
 function App() {
 

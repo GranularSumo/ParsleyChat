@@ -1,6 +1,5 @@
 import { useEffect } from "react";
-import logo from "../assets/ChatGPT Image Oct 27, 2025, 09_09_33 AM.png";
-import { useConnectionContext } from "../contexts/ConnectionContext";
+import { useConnectionContext } from "../../contexts/ConnectionContext";
 import { useNavigate } from 'react-router';
 
 
@@ -37,7 +36,6 @@ export default function LoginScreen() {
     <div className="w-full h-full flex items-center justify-center bg-black">
       <div className="bg-green-900 border border-green-500 rounded-lg p-8 max-w-md w-full">
         <div className="flex items-center justify-center gap-3 mb-6">
-          <img src={logo} alt="Logo" className="w-12 h-12 object-cover rounded-full rotate-45" />
           <h2 className="text-green-300 text-3xl tracking-wider text-center">
             PARSLEY-CHAT TERMINAL
           </h2>
