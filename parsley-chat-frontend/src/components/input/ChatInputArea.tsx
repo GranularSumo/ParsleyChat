@@ -17,14 +17,18 @@ export default function ChatInputArea({
   function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
-      sendMessage(message);
-      setMessage("");
+      if (message.trim()) {
+        sendMessage(message);
+        setMessage("");
+      }
     }
   }
 
   function handleSend() {
-    sendMessage(message);
-    setMessage("");
+    if (message.trim()) {
+      sendMessage(message);
+      setMessage("");
+    }
   }
 
   return (

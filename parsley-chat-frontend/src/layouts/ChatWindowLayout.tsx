@@ -1,5 +1,5 @@
-import ChatWindow from "../components/ChatWindow";
-import ChatRoomList from "../components/ChatRoomList";
+import ChatWindow from "../components/layout/ChatWindow";
+import ChatRoomList from "../components/rooms/ChatRoomList";
 
 
 export default function ChatWindowLayout() {
