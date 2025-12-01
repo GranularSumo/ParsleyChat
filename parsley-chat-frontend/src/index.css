@@ -1,1 +1,40 @@
 @import "tailwindcss";
+
+@layer base {
+  * {
+    font-family: 'VT323', monospace;
+  }
+}
+
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-ticker {
+  display: inline-block;
+  animation: ticker-scroll 80s linear infinite;
+}
+
+@keyframes global-pulse {
+  0%, 100% {
+    opacity: 1;
+    filter: blur(10px);
+  }
+  50% {
+    opacity: 0.5;
+    filter: blur(8px)
+  }
+}
+
+.message-pulse {
+  animation: global-pulse 2s ease-in-out infinite;
+}
+
+
+
+

@@ -1,5 +1,7 @@
 package com.parsley.parsley_chat;
 
+import java.util.ArrayList;
+
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -28,7 +30,10 @@ public class MessageController {
   @MessageMapping("/message/{roomId}")
   @SendTo("/chatroom/{roomId}")
   public Message sendMessage(@DestinationVariable String roomId, @Payload Message message) {
-    messageService.getMessages().add(message);
+    if (!messageService.getMessageMap().containsKey(roomId)) {
+      messageService.getMessageMap().put(roomId, new ArrayList<Message>());
+    }
+    messageService.getMessageMap().get(roomId).add(message);
     return message;
   }
 
@@ -42,7 +47,11 @@ public class MessageController {
 
   @MessageMapping("/join/{roomId}")
   public void getMessageHistory(@DestinationVariable String roomId) {
-    template.convertAndSend("/chatroom/" + roomId + "/history", messageService.getMessages());
+    if (!messageService.getMessageMap().containsKey(roomId)) {
+      messageService.getMessageMap().put(roomId, new ArrayList<Message>());
+    }
+
+    template.convertAndSend("/chatroom/" + roomId + "/history", messageService.getMessageMap().get(roomId));
   }
 
 }
